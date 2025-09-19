@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Destinations from "./pages/Destinations";
 import Blog from "./pages/Blog";
@@ -7,8 +7,26 @@ import BlogPost from "./pages/BlogPost";
 import HotDeals from "./pages/HotDeals";
 import About from "./pages/About";
 
+// ScrollToTop component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Scroll to top when pathname changes
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -87,6 +105,7 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1">
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/destinations" element={<Destinations />} />
