@@ -1,135 +1,135 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { DateRange } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 import { FaAirbnb, FaCar } from "react-icons/fa";
 import { FaHotel } from "react-icons/fa6";
 
-export default function BookingModal({ isOpen, onClose, destination }) {
-  const [platform, setPlatform] = useState(null);
-  const [dates, setDates] = useState({ start: "", end: "" });
+const BookingModal = ({ isOpen, destination, onClose }) => {
+  const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: "selection",
+    },
+  ]);
 
-  const handlePlatformSelect = (p) => {
-    setPlatform(p); // only one at a time
+  if (!isOpen || !destination) return null;
+
+  // ✅ Fix off-by-one bug by forcing local noon
+  const handleDateChange = (ranges) => {
+    const start = new Date(ranges.selection.startDate);
+    const end = new Date(ranges.selection.endDate);
+
+    start.setHours(12, 0, 0, 0);
+    end.setHours(12, 0, 0, 0);
+
+    setDateRange([
+      {
+        startDate: start,
+        endDate: end,
+        key: "selection",
+      },
+    ]);
   };
 
-  const handleConfirm = () => {
-    if (!platform || !dates.start || !dates.end) {
-      alert("Please select a platform and dates.");
+  const handleBooking = () => {
+    if (!selectedPlatform) {
+      alert("Please select a platform first!");
       return;
     }
 
-    let url = "";
-    if (platform === "booking") {
-      url = `https://www.booking.com/searchresults.html?ss=${destination}&checkin=${dates.start}&checkout=${dates.end}`;
-    } else if (platform === "airbnb") {
-      url = `https://www.airbnb.com/s/${destination}/homes?checkin=${dates.start}&checkout=${dates.end}`;
-    } else if (platform === "europcar") {
-      url = `https://www.europcar.com/en/stations?pickup=${destination}&from=${dates.start}&until=${dates.end}`;
+    // Example platform redirect links
+    const startDate = dateRange[0].startDate.toISOString().split("T")[0];
+    const endDate = dateRange[0].endDate.toISOString().split("T")[0];
+
+    let url = "#";
+    if (selectedPlatform === "airbnb") {
+      url = `https://www.airbnb.com/s/${destination.name}/homes?checkin=${startDate}&checkout=${endDate}`;
+    } else if (selectedPlatform === "booking") {
+      url = `https://www.booking.com/searchresults.html?ss=${destination.name}&checkin=${startDate}&checkout=${endDate}`;
+    } else if (selectedPlatform === "europcar") {
+      url = `https://www.europcar.com/en/stations?search=${destination.name}&start_date=${startDate}&end_date=${endDate}`;
     }
 
     window.open(url, "_blank");
-    onClose();
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-gradient-to-br from-white to-gray-100 rounded-2xl shadow-2xl p-6 w-[90%] max-w-md"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-lg p-6 w-[500px] max-w-[90%]">
+        <h2 className="text-xl font-bold mb-4">
+          Book your trip to {destination.name}
+        </h2>
+
+        {/* ✅ Big platform icons */}
+        <div className="flex justify-around mb-6">
+          <button
+            className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${
+              selectedPlatform === "booking"
+                ? "border-blue-600 bg-blue-100"
+                : "border-gray-300 hover:bg-gray-100"
+            }`}
+            onClick={() => setSelectedPlatform("booking")}
           >
-            <h2 className="text-2xl font-bold text-center mb-4">
-              Book {destination}
-            </h2>
+            <FaHotel className="text-4xl text-blue-600 mb-2" />
+            <span className="font-semibold">Booking</span>
+          </button>
 
-            <div className="flex justify-around mb-6">
-              <button
-                className={`flex flex-col items-center p-3 rounded-xl border transition ${
-                  platform === "booking"
-                    ? "bg-blue-500 text-white shadow-lg"
-                    : "bg-white hover:bg-blue-50"
-                }`}
-                onClick={() => handlePlatformSelect("booking")}
-              >
-                <FaHotel size={28} />
-                <span className="text-sm mt-1">Booking</span>
-              </button>
+          <button
+            className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${
+              selectedPlatform === "airbnb"
+                ? "border-red-500 bg-red-100"
+                : "border-gray-300 hover:bg-gray-100"
+            }`}
+            onClick={() => setSelectedPlatform("airbnb")}
+          >
+            <FaAirbnb className="text-4xl text-red-500 mb-2" />
+            <span className="font-semibold">Airbnb</span>
+          </button>
 
-              <button
-                className={`flex flex-col items-center p-3 rounded-xl border transition ${
-                  platform === "airbnb"
-                    ? "bg-pink-500 text-white shadow-lg"
-                    : "bg-white hover:bg-pink-50"
-                }`}
-                onClick={() => handlePlatformSelect("airbnb")}
-              >
-                <FaAirbnb size={28} />
-                <span className="text-sm mt-1">Airbnb</span>
-              </button>
+          <button
+            className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${
+              selectedPlatform === "europcar"
+                ? "border-green-600 bg-green-100"
+                : "border-gray-300 hover:bg-gray-100"
+            }`}
+            onClick={() => setSelectedPlatform("europcar")}
+          >
+            <FaCar className="text-4xl text-green-600 mb-2" />
+            <span className="font-semibold">Europcar</span>
+          </button>
+        </div>
 
-              <button
-                className={`flex flex-col items-center p-3 rounded-xl border transition ${
-                  platform === "europcar"
-                    ? "bg-green-500 text-white shadow-lg"
-                    : "bg-white hover:bg-green-50"
-                }`}
-                onClick={() => handlePlatformSelect("europcar")}
-              >
-                <FaCar size={28} />
-                <span className="text-sm mt-1">Europcar</span>
-              </button>
-            </div>
+        {/* Date picker */}
+        <div className="mb-4">
+          <DateRange
+            ranges={dateRange}
+            onChange={handleDateChange}
+            moveRangeOnFirstSelection={false}
+            rangeColors={["#EF4444"]}
+          />
+        </div>
 
-            <div className="space-y-3">
-              <label className="block">
-                <span className="text-gray-700">Start date</span>
-                <input
-                  type="date"
-                  className="mt-1 w-full p-2 border rounded-lg"
-                  value={dates.start}
-                  onChange={(e) =>
-                    setDates({ ...dates, start: e.target.value })
-                  }
-                />
-              </label>
-
-              <label className="block">
-                <span className="text-gray-700">End date</span>
-                <input
-                  type="date"
-                  className="mt-1 w-full p-2 border rounded-lg"
-                  value={dates.end}
-                  onChange={(e) =>
-                    setDates({ ...dates, end: e.target.value })
-                  }
-                />
-              </label>
-            </div>
-
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Reserve
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Actions */}
+        <div className="flex justify-end gap-2">
+          <button
+            className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            onClick={handleBooking}
+          >
+            Confirm Booking
+          </button>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default BookingModal;
