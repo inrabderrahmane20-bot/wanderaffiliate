@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,6 +16,44 @@ export default function Home() {
       setMessage("");
     }
   };
+
+  const destinations = [
+    {
+      name: "Bali, Indonesia",
+      image:
+        "https://image.urlaubspiraten.de/720/image/upload/v1603282722/mediavault_images/ihjatwhtozn7ljfgtad7.jpg",
+      desc: "Tropical paradise with beaches, temples, and vibrant culture.",
+    },
+    {
+      name: "Paris, France",
+      image:
+        "https://worldinparis.com/wp-content/uploads/2022/01/View-from-the-Pantheon.jpg",
+      desc: "The city of lights, romance, art, and fashion.",
+    },
+    {
+      name: "Tokyo, Japan",
+      image:
+        "https://lp-cms-production.imgix.net/2025-07/shutterstock247901467.jpg?auto=format,compress&q=72&w=1440&h=810&fit=crop",
+      desc: "Modern meets tradition in the bustling Japanese capital.",
+    },
+  ];
+
+  const blogs = [
+    {
+      id: 1,
+      title: "Top 10 Hidden Gems in Bali 🌴",
+      image:
+        "https://www.agoda.com/wp-content/uploads/2024/08/Sangeh-Monkey-Forest-featured.jpg",
+      desc: "Explore lesser-known spots in Bali that tourists often miss.",
+    },
+    {
+      id: 2,
+      title: "A Foodie’s Guide to Paris 🥐",
+      image:
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/6a/36/00/caption.jpg?w=1200&h=700&s=1&cx=4096&cy=2732&chk=v1_1f60470edd252a73c967",
+      desc: "From croissants to Michelin stars, taste your way through Paris.",
+    },
+  ];
 
   return (
     <div className="bg-gray-50">
@@ -37,52 +76,101 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main options */}
-      <div className="max-w-6xl mx-auto px-6 lg:px-8 py-20 text-center">
-        <h2 className="text-3xl font-bold mb-12">Start Your Journey</h2>
-
+      {/* Destinations Preview */}
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">Top Destinations</h2>
         <div className="grid gap-8 md:grid-cols-3">
-          {/* Destinations */}
+          {destinations.map((d, i) => (
+            <div
+              key={i}
+              onClick={() => navigate(`/destinations?search=${encodeURIComponent(d.name)}`)}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition cursor-pointer"
+            >
+              <img src={d.image} alt={d.name} className="h-48 w-full object-cover" />
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2">{d.name}</h3>
+                <p className="text-gray-600 text-sm">{d.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-10">
           <Link
             to="/destinations"
-            className="p-10 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition transform flex flex-col justify-center items-center"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700"
           >
-            <span className="text-2xl font-bold mb-3">🌎 Explore Destinations</span>
-            <p className="text-sm text-gray-100">
-              Find the most popular and unique places around the world.
-            </p>
+            View More Destinations →
           </Link>
-
-          {/* Blog */}
-          <Link
-            to="/blog"
-            className="p-10 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition transform flex flex-col justify-center items-center"
-          >
-            <span className="text-2xl font-bold mb-3">📝 Travel Blog</span>
-            <p className="text-sm text-gray-100">
-              Read travel tips, guides, and inspiring stories.
-            </p>
-          </Link>
-
-          {/* Contact CTA */}
-          <a
-            href="#contact"
-            className="p-10 bg-gradient-to-r from-pink-500 to-red-600 text-white rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition transform flex flex-col justify-center items-center"
-          >
-            <span className="text-2xl font-bold mb-3">📩 Contact Us</span>
-            <p className="text-sm text-gray-100">
-              Get in touch with us for any inquiries or collaborations.
-            </p>
-          </a>
         </div>
       </div>
 
-      {/* Contact section at bottom */}
+      {/* Blog Preview */}
+      <div className="bg-gray-100 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">Latest from Our Blog</h2>
+          <div className="grid gap-8 md:grid-cols-2">
+            {blogs.map((post) => (
+              <Link
+                key={post.id}
+                to={`/blog/${post.id}`}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition block"
+              >
+                <img src={post.image} alt={post.title} className="h-56 w-full object-cover" />
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">{post.title}</h3>
+                  <p className="text-gray-600 text-sm">{post.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link
+              to="/blog"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700"
+            >
+              View More Blog Posts →
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* About Preview */}
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">Why WanderAffiliate?</h2>
+        <div className="grid gap-8 md:grid-cols-3 text-center">
+          <div className="p-6 bg-white shadow-lg rounded-xl">
+            <h3 className="font-bold text-xl mb-3">🌍 Curated Destinations</h3>
+            <p className="text-gray-600 text-sm">
+              Hand-picked destinations to make your travel unforgettable.
+            </p>
+          </div>
+          <div className="p-6 bg-white shadow-lg rounded-xl">
+            <h3 className="font-bold text-xl mb-3">📝 Authentic Stories</h3>
+            <p className="text-gray-600 text-sm">
+              Real travel experiences from passionate explorers.
+            </p>
+          </div>
+          <div className="p-6 bg-white shadow-lg rounded-xl">
+            <h3 className="font-bold text-xl mb-3">💸 Exclusive Deals</h3>
+            <p className="text-gray-600 text-sm">
+              Find the best travel platforms and save money on bookings.
+            </p>
+          </div>
+        </div>
+        <div className="text-center mt-10">
+          <Link
+            to="/about"
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700"
+          >
+            Learn More →
+          </Link>
+        </div>
+      </div>
+
+      {/* Contact section */}
       <div id="contact" className="bg-white py-20 border-t border-gray-200">
         <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Get in Touch ✉️
-          </h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Get in Touch ✉️</h2>
           {submitted ? (
             <p className="text-green-600 font-medium text-center">
               ✅ Message sent! We’ll reply soon.
